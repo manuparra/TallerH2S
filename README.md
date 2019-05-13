@@ -437,19 +437,19 @@ hdfs dfs -cat /user/mp2019/<yourID>/<folder>/part-r-00000
 
 Folder ``/user/mp2019/`` contains several samples of a BigData dataset named ECBDL.
 
-´´´
+```
 Rows    Bytes                         Folder and File
 ------- ---------                     ----------------
 5000    177876    2019-05-13 18:14    /user/mp2019/5000_ECBDL14_10tst.data
 20000   711174    2019-05-13 18:13    /user/mp2019/20000_ECBDL14_10tst.data
 500000  17683919  2019-05-13 18:14    /user/mp2019/500000_ECBDL14_10tst.data
 2897918 102747181 2019-05-13 18:14    /user/mp2019/ECBDL14_10tst.data
-´´´
+```
 
 
 ### Calculate MIN of a row in Hadoop
 
-Mapper:
+Mapper (old version):
 
 
 ```
@@ -476,7 +476,7 @@ public class MinMapper extends MapReduceBase implements Mapper<LongWritable, Tex
 ```
 
 
-Reducer:
+Reducer (old version):
 
 ````
 public class MinReducer extends MapReduceBase implements Reducer<Text, DoubleWritable, Text, DoubleWritable> {
@@ -498,7 +498,7 @@ public class MinReducer extends MapReduceBase implements Reducer<Text, DoubleWri
 }
 ````
 
-Main:
+Main (old version):
 
 ```
   public static void main(String[] args) throws Exception {
