@@ -204,6 +204,140 @@ hdfs dfs -rmr
 
 ## Working with Hadoop Map-Reduce
 
+Hadoop version: 2.9.3
+
+### Structure of M/R code
+
+#### Mapper
+
+Maps input key/value pairs to a set of intermediate key/value pairs.
+Maps are the individual tasks which transform input records into a intermediate records. The transformed intermediate records need not be of the same type as the input records. A given input pair may map to zero or many output pairs.
+
+```
+public class TokenCounterMapper 
+     extends Mapper<Object, Text, Text, IntWritable>{
+    
+   private final static IntWritable one = new IntWritable(1);
+   private Text word = new Text();
+   
+   public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+     StringTokenizer itr = new StringTokenizer(value.toString());
+     while (itr.hasMoreTokens()) {
+       word.set(itr.nextToken());
+       context.write(word, one);
+     }
+   }
+ }
+```
+
+#### Reducer
+
+Reduces a set of intermediate values which share a key to a smaller set of values.
+
+Reducer has 3 primary phases:
+
+- Shuffle: The Reducer copies the sorted output from each Mapper using HTTP across the network.
+- Sort: The framework merge sorts Reducer inputs by keys (since different Mappers may have output the same key). The shuffle and sort phases occur simultaneously i.e. while outputs are being fetched they are merged. A SecondarySort in ordet to achieve a secondary sort on the values returned by the value iterator, the application should extend the key with the secondary key and define a grouping comparator. The keys will be sorted using the entire key, but will be grouped using the grouping comparator to decide which keys and values are sent in the same call to reduce.The grouping comparator is specified via Job.setGroupingComparatorClass(Class). The sort order is controlled by Job.setSortComparatorClass(Class).
+-Reduce In this phase the reduce(Object, Iterable, org.apache.hadoop.mapreduce.Reducer.Context) method is called for each <key, (collection of values)> in the sorted inputs.
+
+The output of the reduce task is typically written to a RecordWriter via TaskInputOutputContext.write(Object, Object).
+
+```
+public class IntSumReducer<Key> extends Reducer<Key,IntWritable,
+                                                 Key,IntWritable> {
+   private IntWritable result = new IntWritable();
+ 
+   public void reduce(Key key, Iterable<IntWritable> values,
+                      Context context) throws IOException, InterruptedException {
+     int sum = 0;
+     for (IntWritable val : values) {
+       sum += val.get();
+     }
+     result.set(sum);
+     context.write(key, result);
+   }
+ }
+ 
+```
+
+#### 
+
+
+### Word Count example
+
+
+
+```
+import java.io.IOException;
+import java.util.StringTokenizer;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+public class WordCount {
+
+  public static class TokenizerMapper
+       extends Mapper<Object, Text, Text, IntWritable>{
+
+    private final static IntWritable one = new IntWritable(1);
+    private Text word = new Text();
+
+    public void map(Object key, Text value, Context context
+                    ) throws IOException, InterruptedException {
+      StringTokenizer itr = new StringTokenizer(value.toString());
+      while (itr.hasMoreTokens()) {
+        word.set(itr.nextToken());
+        context.write(word, one);
+      }
+    }
+  }
+
+  public static class IntSumReducer
+       extends Reducer<Text,IntWritable,Text,IntWritable> {
+    private IntWritable result = new IntWritable();
+
+    public void reduce(Text key, Iterable<IntWritable> values,
+                       Context context
+                       ) throws IOException, InterruptedException {
+      int sum = 0;
+      for (IntWritable val : values) {
+        sum += val.get();
+      }
+      result.set(sum);
+      context.write(key, result);
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    Configuration conf = new Configuration();
+    Job job = Job.getInstance(conf, "word count");
+    job.setJarByClass(WordCount.class);
+    job.setMapperClass(TokenizerMapper.class);
+    job.setCombinerClass(IntSumReducer.class);
+    job.setReducerClass(IntSumReducer.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(IntWritable.class);
+    FileInputFormat.addInputPath(job, new Path(args[0]));
+    FileOutputFormat.setOutputPath(job, new Path(args[1]));
+    System.exit(job.waitForCompletion(true) ? 0 : 1);
+  }
+}
+
+
+
+```
+
+
+
+
+
 
 
 # References:
