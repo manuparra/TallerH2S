@@ -1,5 +1,48 @@
 # Workshop Material for HDFS, Hadoop and Spark
 
+Manuel Parra: manuelparra@decsai.ugr.es
+
+Content:
+
+- [Workshop - HDFS, Hadoop](#workshop-material-for-hdfs--hadoop-and-spark)
+  * [How to connect](#how-to-connect)
+  * [What is hadoop.ugr.es](#what-is-hadoopugres)
+  * [Working with HDFS](#working-with-hdfs)
+    + [HDFS basics](#hdfs-basics)
+    + [HDFS storage space](#hdfs-storage-space)
+    + [Usage HDFS](#usage-hdfs)
+  * [Exercice](#exercice)
+  * [Working with Hadoop Map-Reduce](#working-with-hadoop-map-reduce)
+    + [Structure of M/R code](#structure-of-m-r-code)
+      - [Mapper](#mapper)
+      - [Reducer](#reducer)
+      - [Main](#main)
+    + [Word Count example](#word-count-example)
+    + [WordCount example file](#wordcount-example-file)
+    + [Running Hadoop applications](#running-hadoop-applications)
+    + [Results](#results)
+    + [Datasets](#datasets)
+    + [Calculate MIN of a row in Hadoop](#calculate-min-of-a-row-in-hadoop)
+    + [Compile MIN in Hadoop](#compile-min-in-hadoop)
+    + [References](#references-)
+- [Workshop - SparkR](#sparkr)
+  * [How to connect](#how-to-connect-1)
+  * [Start R shell for Spark](#start-r-shell-for-spark)
+  * [Create the Spark Environment](#create-the-spark-environment)
+  * [Close the Spark Session](#close-the-spark-session)
+  * [Spark Session parameters](#spark-session-parameters)
+  * [Creating SparkDataFrames](#creating-sparkdataframes)
+    + [From local data frames](#from-local-data-frames)
+    + [From Data Sources](#from-data-sources)
+    + [How to read/write from/to hdfs](#how-to-read-write-from-to-hdfs)
+  * [SparkDataFrame Operations](#sparkdataframe-operations)
+  * [Grouping and Aggregation](#grouping-and-aggregation)
+  * [Operating on Columns](#operating-on-columns)
+  * [SparkSQL](#sparksql)
+  * [Machine learning](#machine-learning)
+  * [Let see some examples](#let-see-some-examples)
+    + [First example](#first-example)
+
 ## How to connect
 
 From linux/MacOs machines: 
