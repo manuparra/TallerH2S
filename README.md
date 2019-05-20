@@ -586,11 +586,219 @@ hdfs dfs -cat /user/mp2019/mp<DNI>/lorem.txt
 
 
 
+# SparkR
+
+API SparkR: https://spark.apache.org/docs/2.2.0/api/R/
+
+## How to connect
 
 
+```
+ssh <yourID>@hadoop.ugr.es
+```
+
+## Start R shell for Spark
+
+Run the next command:
+
+```
+R
+```
+
+## Create the Spark Environment
 
 
+```
 
+if (nchar(Sys.getenv("SPARK_HOME")) < 1) {
+  Sys.setenv(SPARK_HOME = "/opt/spark-2.2.0/")
+}
+
+library(SparkR, lib.loc = c(file.path(Sys.getenv("SPARK_HOME"), "R", "lib")))
+
+sparkR.session(master = "local[*]", sparkConfig = list(
+  spark.driver.memory = "1g"),enableHiveSupport=FALSE)
+
+```
+
+## Close the Spark Session
+
+
+```
+sparkR.session.stop()
+```
+
+## Spark Session parameters
+
+```
+Property Name                   Property group          spark-submit equivalent
+spark.master                    Application Properties  --master
+spark.yarn.keytab               Application Properties  --keytab
+spark.yarn.principal            Application Properties  --principal
+spark.driver.memory             Application Properties  --driver-memory
+spark.driver.extraClassPath     Runtime Environment     --driver-class-path
+spark.driver.extraJavaOptions   Runtime Environment     --driver-java-options
+spark.driver.extraLibraryPath   Runtime Environment     --driver-library-path
+
+```
+
+## Creating SparkDataFrames
+
+With a SparkSession, applications can create SparkDataFrames from a local R data frame, from a Hive table, or from other data sources.
+
+### From local data frames
+
+The simplest way to create a data frame is to convert a local R data frame into a SparkDataFrame. Specifically we can use as.DataFrame or createDataFrame and pass in the local R data frame to create a SparkDataFrame. As an example, the following creates a SparkDataFrame based using the faithful dataset from R.
+
+```
+df <- as.DataFrame(faithful)
+```
+
+Show data in df:
+
+```
+head(df)
+```
+
+### From Data Sources
+
+SparkR supports operating on a variety of data sources through the SparkDataFrame interface.
+
+SparkR supports reading JSON, CSV and Parquet files natively, and through packages available from sources like Third Party Projects, you can find data source connectors for popular file formats like Avro.
+
+```
+data1 <- read.df("my_file.json", "json")
+data2 <- read.df("my_file.csv", "csv")
+...
+```
+
+### How to read/write from/to hdfs
+
+
+Read as DataFrame ``/user/mp2019/5000_ECBDL14_10tst.data``:
+
+```
+df5000 <- read.df("hdfs://hadoop-master/user/mp2019/5000_ECBDL14_10tst.data", source="csv")
+
+```
+
+Check data:
+
+```
+summary(df5000)
+```
+
+Explain the data: From _c0 to _c9 (data), class variable: _c10.
+
+## SparkDataFrame Operations
+
+Create the SparkDataFrame
+
+```
+df <- as.DataFrame(faithful)
+```
+
+Get basic information about the SparkDataFrame
+
+``
+df
+``
+
+Select only the "eruptions" column
+
+```
+select(df, df$eruptions)
+``
+
+Show:
+
+```
+head(select(df, df$eruptions))
+``
+
+
+Filter the SparkDataFrame to only retain rows with wait times shorter than 50 mins
+
+```
+filter(df, df$waiting < 50)
+```
+
+Show first results
+
+```
+head(filter(df, df$waiting < 50))
+```
+
+## Grouping and Aggregation
+
+SparkR data frames support a number of commonly used functions to aggregate data after grouping. 
+
+
+We use the `n` operator to count the number of times each waiting time appears
+
+```
+head(summarize(groupBy(df, df$waiting), count = n(df$waiting)))
+```
+
+## Operating on Columns
+
+SparkR also provides a number of functions that can directly applied to columns for data processing and during aggregation.
+
+```
+df$waiting_secs <- df$waiting * 60
+```
+
+## SparkSQL
+
+```
+df5000 <- read.df("hdfs://hadoop-master/user/mp2019/5000_ECBDL14_10tst.data", source="csv")
+```
+
+Check summary:
+
+```
+summary(df5000)
+```
+
+Convert to SparkSQLObject:
+
+```
+createOrReplaceTempView(df5000, "df5000sql")
+
+```
+
+Use the next sentence:
+
+```
+results <- sql("SELECT _c0  FROM df5000sql")
+```
+
+Check results:
+
+```
+head(results)
+```
+
+
+```
+results <- sql("SELECT max(_c0)  FROM df5000sql")
+
+```
+
+**Question:**
+
+What is the pair of columns more correlated?
+
+Check SQL functions: https://spark.apache.org/docs/2.3.0/api/sql/index.html
+
+**5 minutes**
+
+
+**How many records of each class are there?**
+
+```
+results <- sql("SELECT count(*),_c10  FROM df5000sql group by _c10")
+```
 
 
 
