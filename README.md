@@ -616,10 +616,11 @@ if (nchar(Sys.getenv("SPARK_HOME")) < 1) {
 
 library(SparkR, lib.loc = c(file.path(Sys.getenv("SPARK_HOME"), "R", "lib")))
 
-sparkR.session(master = "local[*]", sparkConfig = list(
-  spark.driver.memory = "1g"),enableHiveSupport=FALSE)
+sparkR.session(master = "local[*]", sparkConfig = list(spark.driver.memory = "1g"),enableHiveSupport=FALSE)
 
 ```
+
+
 
 ## Close the Spark Session
 
@@ -800,6 +801,81 @@ Check SQL functions: https://spark.apache.org/docs/2.3.0/api/sql/index.html
 results <- sql("SELECT count(*),_c10  FROM df5000sql group by _c10")
 ```
 
+## Machine learning
 
+SparkR supports the following machine learning algorithms currently:
 
+- Classification
+  - spark.logit: Logistic Regression
+  - spark.mlp: Multilayer Perceptron (MLP)
+  - spark.naiveBayes: Naive Bayes
+  - spark.svmLinear: Linear Support Vector Machine
+- Regression
+  - spark.survreg: Accelerated Failure Time (AFT) Survival Model
+  - spark.glm or glm: Generalized Linear Model (GLM)
+  - spark.isoreg: Isotonic Regression
+- Tree
+  - spark.gbt: Gradient Boosted Trees for Regression and Classification
+  - spark.randomForest: Random Forest for Regression and Classification
+- Clustering
+  - spark.bisectingKmeans: Bisecting k-means
+  - spark.gaussianMixture: Gaussian Mixture Model (GMM)
+  - spark.kmeans: K-Means
+  - spark.lda: Latent Dirichlet Allocation (LDA)
+- Collaborative Filtering
+  - spark.als: Alternating Least Squares (ALS)
+- Frequent Pattern Mining
+  - spark.fpGrowth : FP-growth
+- Statistics
+  - spark.kstest: Kolmogorov-Smirnov Test
+
+Under the hood, SparkR uses MLlib to train the model. Please refer to the corresponding section of MLlib user guide for example code. Users can call summary to print a summary of the fitted model, predict to make predictions on new data, and write.ml/read.ml to save/load fitted models. SparkR supports a subset of the available R formula operators for model fitting, including ‘~’, ‘.’, ‘:’, ‘+’, and ‘-‘.
+
+## Let see some examples
+
++Info: https://spark.apache.org/docs/2.2.0/ml-classification-regression.html
+
+Before start, check the columns types:
+
+```
+summary(df5000)
+```
+
+Result:
+
+```
+SparkDataFrame[summary:string, _c0:string, _c1:string, _c2:string, _c3:string, _c4:string, _c5:string, _c6:string, _c7:string, _c8:string, _c9:string, _c10:string]
+```
+
+ALL TYPES are STRING :(
+
+Solution: Infer Scheme !
+
+```
+df5000 <- read.df("hdfs://hadoop-master/user/mp2019/5000_ECBDL14_10tst.data", source="csv",  inferSchema = "true", header="true")
+```
+
+Check again:
+
+```
+summary(df5000)
+```
+
+### First example
+
+```
+training <- df5000
+test <- df5000
+```
+
+```
+model = spark.logit(training, f1 ~ class, maxIter = 10, regParam = 0.3, elasticNetParam = 0.8)
+
+```
+
+See the model:
+
+```
+summary(model)
+```
 
